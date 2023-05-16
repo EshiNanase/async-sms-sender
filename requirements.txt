@@ -1,2 +1,4 @@
 asks==3.0.0
 trio==0.22.0
+quart==0.18.4
+quart_trio==0.10.0

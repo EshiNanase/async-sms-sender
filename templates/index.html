@@ -44,6 +44,7 @@
       </div>
     </div>
   </div>
+  {% raw %}
   <script type="x-template" id="mailingProgressTemplate">
     <div>
       <p class="lead p-3" v-if="!mailings.length">Пока нет рассылок</p>
@@ -71,6 +72,7 @@
       <!-- End SMSMailing card -->
     </div>
   </script>
+  {% endraw %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/loglevel/1.6.4/loglevel.min.js" integrity="sha256-ACTlnmNCkOooSKkPCKYbiex8WLE82aeiN+Z9ElZag5Q=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js" integrity="sha256-xgP6yiUGsRLSmsC8oW0KrRWiK2ek7cSBznIDMEcdp/U=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
@@ -97,11 +99,11 @@
           method: 'POST',
           body: bodyParams,
         }).then(response => {
-          
+
           response.json().then(data => {
             form.reset();
             form.firstElementChild.disabled = false;
-            
+
             if (data.errorMessage){
               alert(data.errorMessage);
             }
