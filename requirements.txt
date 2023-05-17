@@ -1,4 +1,6 @@
 asks==3.0.0
-trio==0.22.0
+trio==0.21.0
 quart==0.18.4
 quart_trio==0.10.0
+aioredis==2.0.*
+trio_asyncio==0.12.0
