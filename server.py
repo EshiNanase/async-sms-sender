@@ -6,15 +6,12 @@ from sms_center_api import request_smsc_mocked
 import logging
 from db import Database
 import aioredis
-from trio_asyncio import aio_as_trio
 from hypercorn.trio import serve
 from hypercorn.config import Config as HyperConfig
 import warnings
 import asyncclick as click
 
 app = QuartTrio(__name__)
-
-STATUS = [{}]
 
 
 @app.route('/')
@@ -46,7 +43,7 @@ async def send_message():
     logging.info(f'Отправлено сообщение с текстом {text}!')
 
     redis_db = app.config['redis_db']
-    await aio_as_trio(redis_db.add_sms_mailing)(message['id'], payload['phones'], payload['mes'])
+    await trio_asyncio.aio_as_trio(redis_db.add_sms_mailing)(message['id'], payload['phones'], payload['mes'])
     return await render_template('index.html')
 
 
@@ -55,8 +52,8 @@ async def receive_information():
 
     redis_db = app.config['redis_db']
     while True:
-        sms_ids = await aio_as_trio(redis_db.list_sms_mailings)()
-        mailings = await aio_as_trio(redis_db.get_sms_mailings)(*sms_ids)
+        sms_ids = await trio_asyncio.aio_as_trio(redis_db.list_sms_mailings)()
+        mailings = await trio_asyncio.aio_as_trio(redis_db.get_sms_mailings)(*sms_ids)
 
         message = {
             "msgType": "SMSMailingStatus",
@@ -80,15 +77,15 @@ async def receive_information():
 
 
 @click.command()
-@click.option('-l', '--login', help='Логин')
-@click.option('-p', '--password', help='Пароль')
+@click.option('-l', '--login', help='Логин аккаунта SMS Центра')
+@click.option('-p', '--password', help='Пароль аккаунта SMS Центра')
 @click.option('-r', '--redis', help='Ссылка на базу данных Redis')
 @click.option('-t', '--telephone', help='Номер телефона')
 async def run_server(login, password, redis, telephone):
     warnings.filterwarnings('ignore')
+    redis = aioredis.from_url(redis, decode_responses=True)
 
     async with trio_asyncio.open_loop() as loop:
-        redis = aioredis.from_url(redis, decode_responses=True)
         try:
             redis_db = Database(redis)
             config = HyperConfig()

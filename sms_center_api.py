@@ -33,8 +33,8 @@ async def request_smsc_mocked(http_method, api_method, payload, login, password)
 
 
 @click.command()
-@click.option('-l', '--login', help='Логин')
-@click.option('-p', '--password', help='Пароль')
+@click.option('-l', '--login', help='Логин аккаунта SMS Центра')
+@click.option('-p', '--password', help='Пароль аккаунта SMS Центра')
 @click.option('-m', '--message', help='Текст сообщения')
 @click.option('-t', '--telephone', help='Номер телефона')
 async def main(login, password, message, telephone):
