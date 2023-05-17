@@ -1,16 +1,16 @@
+import logging
 import asks
-from contextvars import ContextVar
 import json
 from unittest.mock import patch
-
+import asyncclick as click
 import trio
 
 
-async def request_smsc(http_method, api_method, payload, login=None, password=None):
+async def request_smsc(http_method, api_method, payload, login, password):
 
     params = {
-        'login': login or smsc_login.get(),
-        'psw': password or smsc_password.get(),
+        'login': login,
+        'psw': password,
         'fmt': 3,
         'valid': 1,
         'charset': 'utf-8',
@@ -23,7 +23,7 @@ async def request_smsc(http_method, api_method, payload, login=None, password=No
     return json.loads(response.text)
 
 
-async def request_smsc_mocked(http_method, api_method, payload, login=None, password=None):
+async def request_smsc_mocked(http_method, api_method, payload, login, password):
 
     with patch('sms_center_api.request_smsc') as mock_function:
         mock_function.return_value = {"id": 335, "cnt": 3}
@@ -31,10 +31,21 @@ async def request_smsc_mocked(http_method, api_method, payload, login=None, pass
     return message
 
 
+@click.command()
+@click.option('-l', '--login', help='Логин')
+@click.option('-p', '--password', help='Пароль')
+@click.option('-m', '--message', help='Текст сообщения')
+@click.option('-t', '--telephone', help='Номер телефона')
+async def main(login, password, message, telephone):
+
+    logging.basicConfig(level=logging.INFO)
+
+    payload = {
+        'phones': telephone,
+        'mes': message
+    }
+
+    logging.info(await request_smsc('POST', 'send', payload, login, password))
+
 if __name__ == '__main__':
-
-    smsc_login = ContextVar('sms_center_login')
-    smsc_password = ContextVar('sms_center_password')
-
-    smsc_login.set('devman')
-    smsc_password.set('Ab6Kinhyxquot')
+    main()

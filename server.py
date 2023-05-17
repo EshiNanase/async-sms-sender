@@ -10,6 +10,7 @@ from trio_asyncio import aio_as_trio
 from hypercorn.trio import serve
 from hypercorn.config import Config as HyperConfig
 import warnings
+import asyncclick as click
 
 app = QuartTrio(__name__)
 
@@ -31,13 +32,14 @@ async def send_message():
         logging.info('Отправлено пустое сообщение!')
         return await render_template('index.html')
 
-    payload = {
-        'phones': '+79165801273',
-        'mes': text
-    }
-
     sms_center_login = app.config['sms_center_login']
     sms_center_password = app.config['sms_center_password']
+    telephone = app.config['telephone']
+
+    payload = {
+        'phones': telephone,
+        'mes': text
+    }
 
     message = await request_smsc_mocked('POST', 'send', payload, sms_center_login, sms_center_password)
 
@@ -77,20 +79,26 @@ async def receive_information():
         await trio.sleep(3)
 
 
-async def run_server():
+@click.command()
+@click.option('-l', '--login', help='Логин')
+@click.option('-p', '--password', help='Пароль')
+@click.option('-r', '--redis', help='Ссылка на базу данных Redis')
+@click.option('-t', '--telephone', help='Номер телефона')
+async def run_server(login, password, redis, telephone):
     warnings.filterwarnings('ignore')
 
     async with trio_asyncio.open_loop() as loop:
-        redis = aioredis.from_url('redis://default:Q8hcmjphF3UTBoDQZzsNVRCn9HhcpdJv@redis-12681.c11.us-east-1-3.ec2.cloud.redislabs.com:12681', decode_responses=True)
+        redis = aioredis.from_url(redis, decode_responses=True)
         try:
             redis_db = Database(redis)
             config = HyperConfig()
             config.bind = [f"127.0.0.1:5000"]
             config.use_reloader = True
 
-            app.config['sms_center_login'] = 'devman'
-            app.config['sms_center_password'] = 'Ab6Kinhyxquot'
+            app.config['sms_center_login'] = login
+            app.config['sms_center_password'] = password
             app.config['redis_db'] = redis_db
+            app.config['telephone'] = telephone
 
             logging.basicConfig(level=logging.INFO)
 
