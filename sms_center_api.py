@@ -4,6 +4,7 @@ import json
 from unittest.mock import patch
 import asyncclick as click
 import trio
+import sys
 
 
 async def request_smsc(http_method, api_method, payload, login, password):
@@ -48,4 +49,7 @@ async def main(login, password, message, telephone):
     logging.info(await request_smsc('POST', 'send', payload, login, password))
 
 if __name__ == '__main__':
-    main()
+    try:
+        main(_anyio_backend='trio')
+    except KeyboardInterrupt:
+        sys.stderr.write('Вы закрыли скрипт')

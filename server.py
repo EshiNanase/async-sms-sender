@@ -109,4 +109,4 @@ async def run_server(login, password, redis, telephone):
 
 if __name__ == '__main__':
 
-    trio_asyncio.run(run_server)
+    run_server(_anyio_backend='trio')
