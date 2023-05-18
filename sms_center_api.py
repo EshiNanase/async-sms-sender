@@ -3,7 +3,6 @@ import asks
 import json
 from unittest.mock import patch
 import asyncclick as click
-import trio
 import sys
 
 

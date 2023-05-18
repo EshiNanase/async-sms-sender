@@ -2,7 +2,7 @@ import trio
 import trio_asyncio
 from quart import render_template, request, websocket
 from quart_trio import QuartTrio
-from sms_center_api import request_smsc_mocked
+from sms_center_api import request_smsc_mocked, request_smsc
 import logging
 from db import Database
 import aioredis
@@ -38,7 +38,7 @@ async def send_message():
         'mes': text
     }
 
-    message = await request_smsc_mocked('POST', 'send', payload, sms_center_login, sms_center_password)
+    message = await request_smsc('POST', 'send', payload, sms_center_login, sms_center_password)
 
     logging.info(f'Отправлено сообщение с текстом {text}!')
 
